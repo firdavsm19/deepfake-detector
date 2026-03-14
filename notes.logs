@@ -1,0 +1,11 @@
+ever time I need venv to start 
+
+cd ~/projects/deepfake_detector
+source venv/bin/activate
+
+
+KGAT_e64e2a1cac5e1b1515317d107d97bd34
+
+export KAGGLE_API_TOKEN=KGAT_e64e2a1cac5e1b1515317d107d97bd34
+
+kaggle competitions list

@@ -1,0 +1,21 @@
+# Data and models
+data/
+checkpoints/
+logs/
+
+# Virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Kaggle credentials
+.kaggle/
+
+# System files
+.DS_Store
+*.egg-info/
+dist/
+build/
