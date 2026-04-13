@@ -28,8 +28,7 @@ jobs:
       - name: Run PR Review
         env:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-          LLM_MODEL: "gemini/gemini-2.0-flash"
-          GITHUB_TOKEN: ${{ secrets.REVIEW_BOT_GITHUB_TOKEN }}
+          LLM_MODEL: "openrouter/meta-llama/llama-3-8b-instruct"
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
           OPENHANDS_SUPPRESS_BANNER: "1"
@@ -37,7 +36,7 @@ jobs:
           mkdir -p ~/.openhands
           cat > ~/.openhands/settings.json <<EOF
           {
-            "llm_model": "gemini/gemini-2.0-flash",
+            "llm_model": "openrouter/meta-llama/llama-3-8b-instruct",
             "llm_api_key": "$LLM_API_KEY",
             "agent": "CodeActAgent",
             "language": "en"
@@ -49,4 +48,4 @@ jobs:
             --always-approve \
             --override-with-envs \
             --exit-without-confirmation \
-            -t "You are a code reviewer. Review PR #$PR_NUMBER in the GitHub repository $REPO. Analyze the code changes for bugs, security issues, and code quality. Post your findings as a review comment on the PR using the GitHub API with token $GITHUB_TOKEN."
+            -t "You are a code reviewer. Review PR #$PR_NUMBER in the GitHub repository $REPO. Analyze the code changes for bugs, security issues, and code quality."
