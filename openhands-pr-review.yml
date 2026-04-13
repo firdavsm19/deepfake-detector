@@ -1,0 +1,55 @@
+name: OpenHands AI PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  ai-review:
+    runs-on: ubuntu-latest
+    # Only run if triggered by a real PR (not bots)
+    if: github.actor != 'dependabot[bot]' && github.actor != 'github-actions[bot]'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better diff context
+
+      - name: Run OpenHands PR Review
+        uses: All-Hands-AI/openhands-pr-review-action@v1
+        with:
+
+          # Your LLM API key
+          llm_api_key: ${{ secrets.LLM_API_KEY }}
+
+          # Use Claude Sonnet for best results
+          llm_model: "anthropic/claude-sonnet-4-6"
+
+          # Custom review prompt — tailor this to your project
+          review_prompt: |
+            You are an expert code reviewer. Review PR #${{ github.event.pull_request.number }} 
+            in ${{ github.repository }}.
+
+            Focus on:
+            1. Bugs and logic errors
+            2. Security vulnerabilities (SQL injection, XSS, exposed secrets, etc.)
+            3. Performance issues
+            4. Code style and readability
+            5. Missing tests or edge cases
+            6. Breaking changes in public APIs
+
+            Post inline comments on specific lines where issues are found.
+            Use GitHub suggestion syntax (```suggestion) for simple fixes.
+            Be constructive and concise. Approve the PR if no significant issues are found.
+
+            Use the provided GITHUB_TOKEN to post your review.
+
+          # Increase iterations for larger PRs
+          cli_args: "--max-iterations 20"
