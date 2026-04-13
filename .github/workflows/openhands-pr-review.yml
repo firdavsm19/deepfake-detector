@@ -28,24 +28,44 @@ jobs:
       - name: Run PR Review
         env:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-          LLM_MODEL: "openrouter/meta-llama/llama-3-8b-instruct"
+          LLM_MODEL: "openrouter/meta-llama/llama-3-70b-instruct"
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
           OPENHANDS_SUPPRESS_BANNER: "1"
         run: |
           mkdir -p ~/.openhands
+
           cat > ~/.openhands/settings.json <<EOF
           {
-            "llm_model": "openrouter/meta-llama/llama-3-8b-instruct",
+            "llm_model": "openrouter/meta-llama/llama-3-70b-instruct",
             "llm_api_key": "$LLM_API_KEY",
             "agent": "CodeActAgent",
             "language": "en"
           }
           EOF
 
+          PROMPT="You are a professional senior software engineer performing a pull request review.
+
+          Step 1: Fetch the full diff of PR #$PR_NUMBER from repo $REPO using GitHub API or repo tools.
+          Step 2: Analyze all changed files line by line.
+          Step 3: Identify:
+          - Bugs
+          - Security vulnerabilities
+          - Performance issues
+          - Code quality issues
+          - Architecture/design issues
+
+          Step 4: Explain each issue clearly with fix suggestions.
+
+          Step 5: Post a PR review comment using GitHub API and GITHUB_TOKEN.
+
+          IMPORTANT:
+          - You MUST fetch PR diff using tools before reviewing.
+          - Do NOT stop until review is posted."
+
           openhands \
             --headless \
             --always-approve \
             --override-with-envs \
             --exit-without-confirmation \
-            -t "You are a code reviewer. Review PR #$PR_NUMBER in the GitHub repository $REPO. Analyze the code changes for bugs, security issues, and code quality."
+            -t "$PROMPT"
