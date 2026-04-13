@@ -32,6 +32,33 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
           OPENHANDS_SUPPRESS_BANNER: "1"
+          TTY_INTERACTIVE: "1"
+          TTY_COMPATIBLE: "1"
+          TASK: |
+            You are a professional senior software engineer performing a pull request review.
+
+            Your task:
+
+            1. Fetch the full diff of PR #${PR_NUMBER} from repository ${REPO}.
+            2. Analyze all changed files line by line.
+            3. Identify issues:
+               - Bugs
+               - Security vulnerabilities
+               - Performance problems
+               - Code quality issues
+               - Architecture/design issues
+
+            4. For each issue explain:
+               - What is wrong
+               - Why it is a problem
+               - How to fix it
+
+            5. Post a PR review comment using the GitHub API and GITHUB_TOKEN.
+
+            IMPORTANT:
+            - You MUST fetch the PR diff before reviewing.
+            - Do NOT stop until the review is posted.
+
         run: |
           mkdir -p ~/.openhands
 
@@ -44,28 +71,9 @@ jobs:
           }
           EOF
 
-          PROMPT="You are a professional senior software engineer performing a pull request review.
-
-          Step 1: Fetch the full diff of PR #$PR_NUMBER from repo $REPO using GitHub API or repo tools.
-          Step 2: Analyze all changed files line by line.
-          Step 3: Identify:
-          - Bugs
-          - Security vulnerabilities
-          - Performance issues
-          - Code quality issues
-          - Architecture/design issues
-
-          Step 4: Explain each issue clearly with fix suggestions.
-
-          Step 5: Post a PR review comment using GitHub API and GITHUB_TOKEN.
-
-          IMPORTANT:
-          - You MUST fetch PR diff using tools before reviewing.
-          - Do NOT stop until review is posted."
-
           openhands \
             --headless \
             --always-approve \
             --override-with-envs \
             --exit-without-confirmation \
-            -t "$PROMPT"
+            -t "$TASK"
