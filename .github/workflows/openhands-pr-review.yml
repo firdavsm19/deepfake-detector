@@ -1,7 +1,7 @@
 name: PR Review by OpenHands
 on:
   pull_request:
-    types: [labeled, review_requested]
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
@@ -10,9 +10,6 @@ permissions:
 
 jobs:
   pr-review:
-    if: |
-      github.event.label.name == 'review-this' ||
-      github.event.requested_reviewer.login == 'openhands-agent'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout SDK for composite action
