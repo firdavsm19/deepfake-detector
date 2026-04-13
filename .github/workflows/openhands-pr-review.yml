@@ -12,17 +12,11 @@ jobs:
   pr-review:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout SDK for composite action
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          repository: OpenHands/software-agent-sdk
-          ref: main
-          sparse-checkout: |
-            .github/actions/pr-review
-          sparse-checkout-cone-mode: false
 
-      - name: Run PR Review
-        uses: ./.github/actions/pr-review
+      - name: OpenHands PR Review
+        uses: xinbenlv/openhands-pr-review-action@v0
         with:
-          llm-api-key: ${{ secrets.LLM_API_KEY }}
-          llm-model: "gemini/gemini-2.0-flash"
+          llm_api_key: ${{ secrets.LLM_API_KEY }}
+          llm_model: "gemini/gemini-2.0-flash"
