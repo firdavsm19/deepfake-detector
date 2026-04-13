@@ -15,8 +15,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: OpenHands PR Review
-        uses: xinbenlv/openhands-pr-review-action@v0
-        with:
-          llm_api_key: ${{ secrets.LLM_API_KEY }}
-          llm_model: "gemini/gemini-2.0-flash"
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh && echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install OpenHands
+        run: uv tool install openhands --python 3.12
+
+      - name: Run PR Review
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_MODEL: "gemini/gemini-2.0-flash"
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          openhands run \
+            --llm-model "$LLM_MODEL" \
+            --llm-api-key "$LLM_API_KEY" \
+            --task "Review PR #$PR_NUMBER in $REPO. Check for bugs, security issues, and code quality."
