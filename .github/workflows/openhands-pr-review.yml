@@ -1,8 +1,7 @@
 name: PR Review by OpenHands
-
 on:
   pull_request:
-    types: [opened, synchronize, reopened, labeled]
+    types: [labeled, review_requested]
 
 permissions:
   contents: read
@@ -11,14 +10,21 @@ permissions:
 
 jobs:
   pr-review:
+    # Only run when "review-this" label is added OR openhands-agent is requested as reviewer
+    if: |
+      github.event.label.name == 'review-this' ||
+      github.event.requested_reviewer.login == 'openhands-agent'
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
+      - name: Checkout SDK for composite action
         uses: actions/checkout@v4
+        with:
+          repository: OpenHands/software-agent-sdk
+          ref: main
+          sparse-checkout: .github/actions/pr-review   # Only fetch the action folder
 
       - name: Run PR Review
-        uses: OpenHands/software-agent-sdk/.github/actions/pr-review@main
+        uses: ./.github/actions/pr-review              # Local path, not remote
         with:
           llm-api-key: ${{ secrets.LLM_API_KEY }}
           llm-model: "gemini/gemini-2.0-flash"
