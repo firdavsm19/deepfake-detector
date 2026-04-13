@@ -30,3 +30,4 @@ python predict.py path/to/image.jpg
 ## Results
 - Val Accuracy : 90%
 - AUC-ROC      : 0.89
+ 
