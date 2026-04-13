@@ -27,11 +27,10 @@ jobs:
           LLM_MODEL: "gemini/gemini-2.0-flash"
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
+          OPENHANDS_SUPPRESS_BANNER: "1"
         run: |
           openhands \
-            --llm-model "$LLM_MODEL" \
-            --llm-api-key "$LLM_API_KEY" \
             --headless \
             --always-approve \
             --exit-without-confirmation \
-            -t "You are a code reviewer. Review PR #$PR_NUMBER in the GitHub repository $REPO. Analyze the code changes for bugs, security issues, and code quality"
+            -t "You are a code reviewer. Review PR #$PR_NUMBER in the GitHub repository $REPO. Analyze the code changes for bugs, security issues, and code quality."
