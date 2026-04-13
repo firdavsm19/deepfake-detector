@@ -10,7 +10,6 @@ permissions:
 
 jobs:
   pr-review:
-    # Only run when "review-this" label is added OR openhands-agent is requested as reviewer
     if: |
       github.event.label.name == 'review-this' ||
       github.event.requested_reviewer.login == 'openhands-agent'
@@ -21,10 +20,10 @@ jobs:
         with:
           repository: OpenHands/software-agent-sdk
           ref: main
-          sparse-checkout: .github/actions/pr-review   # Only fetch the action folder
+          sparse-checkout: .github/actions/pr-review
 
       - name: Run PR Review
-        uses: ./.github/actions/pr-review              # Local path, not remote
+        uses: ./.github/actions/pr-review
         with:
           llm-api-key: ${{ secrets.LLM_API_KEY }}
           llm-model: "gemini/gemini-2.0-flash"
