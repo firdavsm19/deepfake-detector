@@ -17,7 +17,9 @@ jobs:
         with:
           repository: OpenHands/software-agent-sdk
           ref: main
-          sparse-checkout: .github/actions/pr-review
+          sparse-checkout: |
+            .github/actions/pr-review
+          sparse-checkout-cone-mode: false
 
       - name: Run PR Review
         uses: ./.github/actions/pr-review
