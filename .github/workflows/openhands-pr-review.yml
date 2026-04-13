@@ -1,4 +1,5 @@
 name: PR Review by OpenHands
+
 on:
   pull_request:
     types: [opened, synchronize, reopened]
@@ -11,12 +12,15 @@ permissions:
 jobs:
   pr-review:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Install uv
-        run: curl -LsSf https://astral.sh/uv/install.sh | sh && echo "$HOME/.local/bin" >> $GITHUB_PATH
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install OpenHands
         run: uv tool install openhands --python 3.12
@@ -25,12 +29,24 @@ jobs:
         env:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           LLM_MODEL: "gemini/gemini-2.0-flash"
+          GITHUB_TOKEN: ${{ secrets.REVIEW_BOT_GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
           OPENHANDS_SUPPRESS_BANNER: "1"
         run: |
+          mkdir -p ~/.openhands
+          cat > ~/.openhands/settings.json <<EOF
+          {
+            "llm_model": "gemini/gemini-2.0-flash",
+            "llm_api_key": "$LLM_API_KEY",
+            "agent": "CodeActAgent",
+            "language": "en"
+          }
+          EOF
+
           openhands \
             --headless \
             --always-approve \
+            --override-with-envs \
             --exit-without-confirmation \
-            -t "You are a code reviewer. Review PR #$PR_NUMBER in the GitHub repository $REPO. Analyze the code changes for bugs, security issues, and code quality."
+            -t "You are a code reviewer. Review PR #$PR_NUMBER in the GitHub repository $REPO. Analyze the code changes for bugs, security issues, and code quality. Post your findings as a review comment on the PR using the GitHub API with token $GITHUB_TOKEN."
