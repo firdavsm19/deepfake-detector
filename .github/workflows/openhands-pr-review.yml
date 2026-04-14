@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install uv
         run: |
@@ -28,48 +30,47 @@ jobs:
       - name: Run PR Review
         env:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-          LLM_MODEL: "openrouter/meta-llama/llama-3-70b-instruct"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
           OPENHANDS_SUPPRESS_BANNER: "1"
-          TTY_INTERACTIVE: "1"
-          TTY_COMPATIBLE: "1"
-          TASK: |
-            You are a professional senior software engineer performing a pull request review.
-
-            Your task:
-
-            1. Fetch the full diff of PR #${PR_NUMBER} from repository ${REPO}.
-            2. Analyze all changed files line by line.
-            3. Identify issues:
-               - Bugs
-               - Security vulnerabilities
-               - Performance problems
-               - Code quality issues
-               - Architecture/design issues
-
-            4. For each issue explain:
-               - What is wrong
-               - Why it is a problem
-               - How to fix it
-
-            5. Post a PR review comment using the GitHub API and GITHUB_TOKEN.
-
-            IMPORTANT:
-            - You MUST fetch the PR diff before reviewing.
-            - Do NOT stop until the review is posted.
-
         run: |
           mkdir -p ~/.openhands
 
           cat > ~/.openhands/settings.json <<EOF
           {
             "llm_model": "openrouter/meta-llama/llama-3-70b-instruct",
-            "llm_api_key": "$LLM_API_KEY",
+            "llm_api_key": "${LLM_API_KEY}",
             "agent": "CodeActAgent",
             "language": "en"
           }
           EOF
+
+          # Build the task with variables expanded by the shell
+          TASK="You are a senior software engineer performing a code review on a GitHub pull request.
+
+          Follow these steps exactly:
+
+          1. Run this command to get the PR diff:
+             gh pr diff ${PR_NUMBER} --repo ${REPO}
+
+          2. Run this to get PR metadata:
+             gh pr view ${PR_NUMBER} --repo ${REPO}
+
+          3. Carefully analyze every changed file for:
+             - Bugs and logic errors
+             - Security vulnerabilities
+             - Performance issues
+             - Code quality and maintainability
+             - Architecture or design concerns
+
+          4. Post your review using the GitHub CLI:
+             gh pr review ${PR_NUMBER} --repo ${REPO} --comment --body 'YOUR FULL REVIEW HERE'
+
+          IMPORTANT:
+          - You MUST run the gh commands above — do not skip any step.
+          - Do NOT finish until the review comment has been posted.
+          - The GITHUB_TOKEN environment variable is already set for authentication."
 
           openhands \
             --headless \
