@@ -1,59 +1,25 @@
 name: PR Review by OpenHands
-
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-
+  pull_request_target:
+    types: [opened, ready_for_review, labeled, review_requested]
 permissions:
   contents: read
   pull-requests: write
   issues: write
-
 jobs:
   pr-review:
+    if: |
+      (github.event.action == 'opened' && github.event.pull_request.draft == false) ||
+      github.event.action == 'ready_for_review' ||
+      github.event.label.name == 'review-this' ||
+      github.event.requested_reviewer.login == 'openhands-agent'
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Install uv
-        run: |
-          curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Install OpenHands
-        run: uv tool install openhands --python 3.12
-
       - name: Run PR Review
-        env:
-          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-          LLM_MODEL: "openrouter/anthropic/claude-3.5-haiku"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPO: ${{ github.repository }}
-          OPENHANDS_SUPPRESS_BANNER: "1"
-        run: |
-          mkdir -p ~/.openhands
-
-          cat > ~/.openhands/agent_settings.json <<EOF
-          {
-            "llm": {
-              "model": "openrouter/anthropic/claude-3.5-haiku",
-              "api_key": "${LLM_API_KEY}"
-            }
-          }
-          EOF
-
-          cat > /tmp/task.txt <<EOF
-          You are a senior software engineer performing a code review on a GitHub pull request.
-          Step 1: run: gh pr diff ${PR_NUMBER} --repo ${REPO}
-          Step 2: run: gh pr view ${PR_NUMBER} --repo ${REPO}
-          Step 3: Analyze the changes.
-          Step 4: run: gh pr review ${PR_NUMBER} --repo ${REPO} --comment --body "## AI Code Review (your analysis here)"
-          Do not stop until step 4 is done.
-          EOF
-
-          openhands --headless --json --override-with-envs -f /tmp/task.txt 2>&1
+        uses: OpenHands/software-agent-sdk/.github/actions/pr-review@main
+        with:
+          llm-model: openrouter/anthropic/claude-3.5-haiku
+          llm-base-url: https://openrouter.ai/api/v1
+          review-style: standard
+          llm-api-key: ${{ secrets.LLM_API_KEY }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
