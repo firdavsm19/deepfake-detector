@@ -38,44 +38,36 @@ jobs:
         run: |
           mkdir -p ~/.openhands
 
-          cat > ~/.openhands/settings.json <<EOF
+          # Correct config file name: agent_settings.json (not settings.json)
+          cat > ~/.openhands/agent_settings.json <<EOF
           {
-            "llm_model": "openrouter/meta-llama/llama-3-70b-instruct",
-            "llm_api_key": "${LLM_API_KEY}",
-            "agent": "CodeActAgent",
-            "language": "en"
+            "llm": {
+              "model": "openrouter/meta-llama/llama-3-70b-instruct",
+              "api_key": "${LLM_API_KEY}"
+            }
           }
           EOF
 
-          # Build the task with variables expanded by the shell
-          TASK="You are a senior software engineer performing a code review on a GitHub pull request.
+          # Write task to a file to avoid quoting/escaping issues
+          cat > /tmp/task.txt <<EOF
+          You are a senior software engineer performing a code review on a GitHub pull request.
 
-          Follow these steps exactly:
+          Follow these steps exactly and do not stop until all steps are complete:
 
-          1. Run this command to get the PR diff:
-             gh pr diff ${PR_NUMBER} --repo ${REPO}
+          Step 1 - Get the PR diff by running:
+          gh pr diff ${PR_NUMBER} --repo ${REPO}
 
-          2. Run this to get PR metadata:
-             gh pr view ${PR_NUMBER} --repo ${REPO}
+          Step 2 - Get PR metadata by running:
+          gh pr view ${PR_NUMBER} --repo ${REPO}
 
-          3. Carefully analyze every changed file for:
-             - Bugs and logic errors
-             - Security vulnerabilities
-             - Performance issues
-             - Code quality and maintainability
-             - Architecture or design concerns
+          Step 3 - Analyze the changes for bugs, security issues, performance problems, and code quality issues.
 
-          4. Post your review using the GitHub CLI:
-             gh pr review ${PR_NUMBER} --repo ${REPO} --comment --body 'YOUR FULL REVIEW HERE'
+          Step 4 - Post your review by running:
+          gh pr review ${PR_NUMBER} --repo ${REPO} --comment --body "## AI Code Review
 
-          IMPORTANT:
-          - You MUST run the gh commands above — do not skip any step.
-          - Do NOT finish until the review comment has been posted.
-          - The GITHUB_TOKEN environment variable is already set for authentication."
+          <your full review here>"
 
-          openhands \
-            --headless \
-            --always-approve \
-            --override-with-envs \
-            --exit-without-confirmation \
-            -t "$TASK"
+          You MUST complete all 4 steps. Do not call finish until step 4 is done.
+          EOF
+
+          openhands --headless --override-with-envs -f /tmp/task.txt
