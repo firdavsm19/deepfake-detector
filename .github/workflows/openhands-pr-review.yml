@@ -1,7 +1,7 @@
 name: PR Review by OpenHands
 on:
   pull_request_target:
-    types: [opened, ready_for_review, labeled, review_requested]
+    types: [opened, ready_for_review, labeled, review_requested, synchronize]
 permissions:
   contents: read
   pull-requests: write
@@ -11,6 +11,7 @@ jobs:
     if: |
       (github.event.action == 'opened' && github.event.pull_request.draft == false) ||
       github.event.action == 'ready_for_review' ||
+      github.event.action == 'synchronize' ||
       github.event.label.name == 'review-this' ||
       github.event.requested_reviewer.login == 'openhands-agent'
     runs-on: ubuntu-latest
