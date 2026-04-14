@@ -30,7 +30,7 @@ jobs:
       - name: Run PR Review
         env:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
-          LLM_MODEL: "openrouter/meta-llama/llama-3-70b-instruct"
+          LLM_MODEL: "openrouter/anthropic/claude-3.5-haiku"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
@@ -41,7 +41,7 @@ jobs:
           cat > ~/.openhands/agent_settings.json <<EOF
           {
             "llm": {
-              "model": "openrouter/meta-llama/llama-3-70b-instruct",
+              "model": "openrouter/anthropic/claude-3.5-haiku",
               "api_key": "${LLM_API_KEY}"
             }
           }
@@ -56,18 +56,4 @@ jobs:
           Do not stop until step 4 is done.
           EOF
 
-          echo "=== agent_settings.json ==="
-          cat ~/.openhands/agent_settings.json
-
-          echo "=== task.txt ==="
-          cat /tmp/task.txt
-
-          echo "=== OpenHands version ==="
-          openhands --version
-
-          echo "=== Running OpenHands ==="
-          openhands --headless --json --override-with-envs -f /tmp/task.txt 2>&1 | tee /tmp/openhands-output.jsonl
-          echo "Exit code: $?"
-
-          echo "=== Full output ==="
-          cat /tmp/openhands-output.jsonl
+          openhands --headless --json --override-with-envs -f /tmp/task.txt 2>&1
