@@ -38,7 +38,6 @@ jobs:
         run: |
           mkdir -p ~/.openhands
 
-          # Correct config file name: agent_settings.json (not settings.json)
           cat > ~/.openhands/agent_settings.json <<EOF
           {
             "llm": {
@@ -48,26 +47,27 @@ jobs:
           }
           EOF
 
-          # Write task to a file to avoid quoting/escaping issues
           cat > /tmp/task.txt <<EOF
           You are a senior software engineer performing a code review on a GitHub pull request.
-
-          Follow these steps exactly and do not stop until all steps are complete:
-
-          Step 1 - Get the PR diff by running:
-          gh pr diff ${PR_NUMBER} --repo ${REPO}
-
-          Step 2 - Get PR metadata by running:
-          gh pr view ${PR_NUMBER} --repo ${REPO}
-
-          Step 3 - Analyze the changes for bugs, security issues, performance problems, and code quality issues.
-
-          Step 4 - Post your review by running:
-          gh pr review ${PR_NUMBER} --repo ${REPO} --comment --body "## AI Code Review
-
-          <your full review here>"
-
-          You MUST complete all 4 steps. Do not call finish until step 4 is done.
+          Step 1: run: gh pr diff ${PR_NUMBER} --repo ${REPO}
+          Step 2: run: gh pr view ${PR_NUMBER} --repo ${REPO}
+          Step 3: Analyze the changes.
+          Step 4: run: gh pr review ${PR_NUMBER} --repo ${REPO} --comment --body "## AI Code Review (your analysis here)"
+          Do not stop until step 4 is done.
           EOF
 
-          openhands --headless --override-with-envs -f /tmp/task.txt
+          echo "=== agent_settings.json ==="
+          cat ~/.openhands/agent_settings.json
+
+          echo "=== task.txt ==="
+          cat /tmp/task.txt
+
+          echo "=== OpenHands version ==="
+          openhands --version
+
+          echo "=== Running OpenHands ==="
+          openhands --headless --json --override-with-envs -f /tmp/task.txt 2>&1 | tee /tmp/openhands-output.jsonl
+          echo "Exit code: $?"
+
+          echo "=== Full output ==="
+          cat /tmp/openhands-output.jsonl
