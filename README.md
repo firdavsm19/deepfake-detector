@@ -32,7 +32,7 @@ python predict.py path/to/image.jpg
 - AUC-ROC      : 0.89
 
 
-api_key = "sk-1234567890abcdef1131"
+api_key = "sk-1234567890abcdef11313"
  
  
  
