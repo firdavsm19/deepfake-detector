@@ -30,6 +30,9 @@ python predict.py path/to/image.jpg
 ## Results
 - Val Accuracy : 90%
 - AUC-ROC      : 0.89
+
+
+api_key = "sk-1234567890abcdef"
  
  
  
