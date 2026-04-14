@@ -17,15 +17,15 @@ jobs:
       github.event.action == 'synchronize'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout OpenHands action
+      - name: Checkout OpenHands SDK into subdirectory
         uses: actions/checkout@v4
         with:
           repository: OpenHands/software-agent-sdk
           ref: main
-          sparse-checkout: .github/actions/pr-review
+          path: openhands-sdk
 
       - name: Run PR Review
-        uses: ./.github/actions/pr-review
+        uses: ./openhands-sdk/.github/actions/pr-review
         with:
           llm-model: openrouter/anthropic/claude-3.5-haiku
           llm-base-url: https://openrouter.ai/api/v1
