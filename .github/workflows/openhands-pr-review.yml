@@ -30,6 +30,7 @@ jobs:
       - name: Run PR Review
         env:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_MODEL: "openrouter/meta-llama/llama-3-70b-instruct"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
